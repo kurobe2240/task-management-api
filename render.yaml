@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: task-management-api
+    env: docker
+    region: singapore
+    plan: free
+    healthCheckPath: /swagger
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+    buildCommand: docker build -t task-management-api .
+    startCommand: docker run -p 8080:8080 task-management-api
+
+databases:
+  - name: task-management-db
+    region: singapore
+    plan: free
+    databaseName: taskmanagementdb
+    ipAllowList: [] 
