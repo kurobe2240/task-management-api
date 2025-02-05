@@ -15,16 +15,26 @@ builder.Services.AddFluentValidationAutoValidation()
     .AddValidatorsFromAssemblyContaining<TaskItemValidator>();
 
 // Database configuration
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ?? 
+    builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (connectionString?.StartsWith("postgres://") == true)
+{
+    // Heroku/Railway style connection string to standard format
+    var uri = new Uri(connectionString);
+    var userInfo = uri.UserInfo.Split(':');
+    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=True";
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlServerOptionsAction: sqlOptions =>
-        {
-            sqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 5,
-                maxRetryDelay: TimeSpan.FromSeconds(30),
-                errorNumbersToAdd: null);
-        });
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+    {
+        npgsqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorCodesToAdd: null);
+    });
 });
 
 // Repository registration
@@ -62,7 +72,6 @@ try
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         
         // データベースが存在しない場合は作成し、保留中のマイグレーションを適用
-        dbContext.Database.EnsureDeleted(); // 開発中は既存のDBを削除（本番環境では使用しない）
         dbContext.Database.EnsureCreated();
 
         // デモデータの追加
@@ -85,15 +94,12 @@ catch (Exception ex)
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "TaskManagement.API v1");
-        c.RoutePrefix = "swagger";
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "TaskManagement.API v1");
+    c.RoutePrefix = "swagger";
+});
 
 app.UseDefaultFiles(); // index.htmlをデフォルトページとして設定
 app.UseStaticFiles(); // 静的ファイルの提供を有効化
@@ -103,10 +109,14 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
+// ポート設定
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5015";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 // 起動時のURLを表示
 Console.WriteLine("アプリケーションが起動しました。以下のURLでアクセスできます：");
-Console.WriteLine("メインページ: http://localhost:5015");
-Console.WriteLine("Swagger UI: http://localhost:5015/swagger");
-Console.WriteLine("API エンドポイント: http://localhost:5015/api/TaskItems");
+Console.WriteLine($"メインページ: http://localhost:{port}");
+Console.WriteLine($"Swagger UI: http://localhost:{port}/swagger");
+Console.WriteLine($"API エンドポイント: http://localhost:{port}/api/TaskItems");
 
 app.Run();
