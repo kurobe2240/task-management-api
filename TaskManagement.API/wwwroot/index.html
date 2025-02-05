@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タスク管理アプリ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .task-completed {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">タスク管理アプリ</h1>
+        
+        <!-- タスク追加フォーム -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">新規タスク追加</h5>
+                <form id="addTaskForm">
+                    <div class="mb-3">
+                        <label for="taskTitle" class="form-label">タイトル</label>
+                        <input type="text" class="form-control" id="taskTitle" required maxlength="100">
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskDescription" class="form-label">説明</label>
+                        <textarea class="form-control" id="taskDescription" required maxlength="500"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskDueDate" class="form-label">期限</label>
+                        <input type="datetime-local" class="form-control" id="taskDueDate">
+                    </div>
+                    <button type="submit" class="btn btn-primary">追加</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- タスク一覧 -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">タスク一覧</h5>
+                <div id="taskList" class="list-group">
+                    <!-- タスクがここに動的に追加されます -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = '/api/TaskItems';
+
+        // タスク一覧を取得
+        async function fetchTasks() {
+            try {
+                const response = await fetch(API_BASE_URL);
+                const tasks = await response.json();
+                displayTasks(tasks);
+            } catch (error) {
+                console.error('タスクの取得に失敗しました:', error);
+            }
+        }
+
+        // タスクを表示
+        function displayTasks(tasks) {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            
+            tasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = `list-group-item ${task.isCompleted ? 'task-completed' : ''}`;
+                taskElement.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">${escapeHtml(task.title)}</h5>
+                            <p class="mb-1">${escapeHtml(task.description)}</p>
+                            ${task.dueDate ? `<small>期限: ${new Date(task.dueDate).toLocaleString()}</small>` : ''}
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-success me-2" onclick="toggleTaskCompletion(${task.id}, ${!task.isCompleted})">
+                                ${task.isCompleted ? '未完了に戻す' : '完了'}
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteTask(${task.id})">削除</button>
+                        </div>
+                    </div>
+                `;
+                taskList.appendChild(taskElement);
+            });
+        }
+
+        // タスクを追加
+        document.getElementById('addTaskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const task = {
+                title: document.getElementById('taskTitle').value,
+                description: document.getElementById('taskDescription').value,
+                dueDate: document.getElementById('taskDueDate').value || null,
+                isCompleted: false
+            };
+
+            try {
+                const response = await fetch(API_BASE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(task)
+                });
+
+                if (response.ok) {
+                    document.getElementById('addTaskForm').reset();
+                    fetchTasks();
+                }
+            } catch (error) {
+                console.error('タスクの追加に失敗しました:', error);
+            }
+        });
+
+        // タスクの完了状態を切り替え
+        async function toggleTaskCompletion(id, isCompleted) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/${id}`);
+                const task = await response.json();
+                
+                task.isCompleted = isCompleted;
+                
+                await fetch(`${API_BASE_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(task)
+                });
+
+                fetchTasks();
+            } catch (error) {
+                console.error('タスクの更新に失敗しました:', error);
+            }
+        }
+
+        // タスクを削除
+        async function deleteTask(id) {
+            if (!confirm('このタスクを削除してもよろしいですか？')) {
+                return;
+            }
+
+            try {
+                await fetch(`${API_BASE_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+                fetchTasks();
+            } catch (error) {
+                console.error('タスクの削除に失敗しました:', error);
+            }
+        }
+
+        // HTMLエスケープ
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // 初期表示
+        fetchTasks();
+    </script>
+</body>
+</html> 
