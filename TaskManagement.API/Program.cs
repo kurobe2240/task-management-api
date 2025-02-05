@@ -62,6 +62,10 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TaskManagement.API", Version = "v1" });
 });
 
+// Health checks
+builder.Services.AddHealthChecks()
+    .AddNpgSql(connectionString);
+
 var app = builder.Build();
 
 // Demo data seeding
@@ -109,9 +113,12 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
+// ヘルスチェックエンドポイントを追加
+app.MapHealthChecks("/health");
+
 // ポート設定
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5015";
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+app.Urls.Add($"http://0.0.0.0:{port}");
 
 // 起動時のURLを表示
 Console.WriteLine("アプリケーションが起動しました。以下のURLでアクセスできます：");
