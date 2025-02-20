@@ -1,39 +1,126 @@
-# .NET Core build folders
-bin/
-obj/
+# IDE/エディタファイル
+# 依存関係
+/vendor/
+/node_modules/
+frontend/node_modules/
+/.pnp
+.pnp.js
 
-# Visual Studio files
-.vs/
-*.user
-*.userosscache
-*.sln.docstates
+# 環境設定
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.production
 
-# Rider
-.idea/
-
-# User-specific files
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# Visual Studio Code
-.vscode/
-
-# Windows
-Thumbs.db
-Desktop.ini
-
-# macOS
-.DS_Store
-
-# Logs
+# ビルド出力
+/dist/
+/build/
+frontend/dist/
 *.log
 
-# Local appsettings
-appsettings.Development.json
+# IDE・エディタ
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
 
-# Entity Framework
-*.db
-*.db-shm
-*.db-wal 
+# キャッシュ
+*.cache
+.phpunit.result.cache
+.npm
+.eslintcache
+
+# デバッグ
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# データベース
+*.sqlite
+*.sqlite3
+
+# コンパイル済みファイル
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# バックアップ
+*.bak
+*.backup
+*~
+
+# ログ
+/logs/
+*.log
+npm-debug.log*
+
+# テスト
+/coverage/
+.nyc_output/
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# 依存関係ディレクトリ
+/vendor/
+/node_modules/
+
+# キャッシュ、ログ、一時ファイル
+/var/cache/*
+!/var/cache/.gitkeep
+/var/logs/*
+!/var/logs/.gitkeep
+/logs/*
+!/logs/.gitkeep
+*.log
+*.cache
+
+# 環境設定ファイル
+.env
+.env.local
+.env.*.local
+.env.backup
+
+# 開発環境設定
+.phpunit.result.cache
+.phpunit.cache
+.php-cs-fixer.cache
+
+# ビルドファイル
+/public/build/
+/public/dist/
+/public/hot/
+
+# データベース
+*.sqlite
+*.sqlite-journal
+
+# バックアップファイル
+*.bak
+*.swp
+*.swo
+*~
+
+# OS生成ファイル
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Composerの自動生成ファイル
+composer.phar
+/vendor/
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+
+# アプリケーション特有のファイル

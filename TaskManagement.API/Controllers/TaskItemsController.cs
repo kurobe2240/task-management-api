@@ -57,8 +57,15 @@ namespace TaskManagement.API.Controllers
             {
                 return BadRequest();
             }
-            var taskItem = _mapper.Map<TaskItem>(taskItemDto);
-            await _repository.UpdateAsync(taskItem);
+
+            var existingTask = await _repository.GetByIdAsync(id);
+            if (existingTask == null)
+            {
+                return NotFound();
+            }
+
+            var updatedTask = _mapper.Map(taskItemDto, existingTask);
+            await _repository.UpdateAsync(updatedTask);
             return NoContent();
         }
 

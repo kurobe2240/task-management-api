@@ -1,0 +1,39 @@
+{
+  "Version": 1,
+  "Hash": "fyOr4VxieL8PIP5B2Sms73d9wAna7HWv+XcOQcURzto=",
+  "Source": "TaskManagement.API",
+  "BasePath": "_content/TaskManagement.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "TaskManagement.API\\wwwroot",
+      "Source": "TaskManagement.API",
+      "ContentRoot": "C:\\Users\\yamam\\Documents\\projects\\AI\\Portfolio作品物 タスク管理API\\TaskManagement.API\\wwwroot\\",
+      "BasePath": "_content/TaskManagement.API",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\yamam\\Documents\\projects\\AI\\Portfolio作品物 タスク管理API\\TaskManagement.API\\wwwroot\\index.html",
+      "SourceId": "TaskManagement.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\yamam\\Documents\\projects\\AI\\Portfolio作品物 タスク管理API\\TaskManagement.API\\wwwroot\\",
+      "BasePath": "_content/TaskManagement.API",
+      "RelativePath": "index.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\index.html"
+    }
+  ]
+}

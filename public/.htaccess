@@ -1,0 +1,95 @@
+# セキュリティヘッダーの設定
+<IfModule mod_headers.c>
+    # XSS保護の有効化
+    Header set X-XSS-Protection "1; mode=block"
+    
+    # クリックジャッキング対策
+    Header set X-Frame-Options "SAMEORIGIN"
+    
+    # MIMEタイプスニッフィング防止
+    Header set X-Content-Type-Options "nosniff"
+    
+    # HSTS（HTTP Strict Transport Security）の設定
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    
+    # Content Security Policyの設定
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;"
+    
+    # Referrer-Policyの設定
+    Header set Referrer-Policy "same-origin"
+</IfModule>
+
+# PHP設定
+<IfModule mod_php.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    php_value max_execution_time 30
+    php_value max_input_time 60
+</IfModule>
+
+# URLリライティング
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # 以下のディレクトリとファイルへのアクセスを拒否
+    RewriteRule ^vendor/.* - [F]
+    RewriteRule ^src/.* - [F]
+    RewriteRule ^config/.* - [F]
+    RewriteRule ^tests/.* - [F]
+    RewriteRule ^\.env.* - [F]
+    RewriteRule ^composer\..* - [F]
+    
+    # 既存のファイルやディレクトリは除外
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # すべてのリクエストをindex.phpにリダイレクト
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# デフォルトの文字セット設定
+AddDefaultCharset UTF-8
+
+# デフォルトのインデックスファイル
+DirectoryIndex index.php
+
+# ディレクトリリスティングの無効化
+Options -Indexes
+
+# エラードキュメントの設定
+ErrorDocument 404 /index.php
+ErrorDocument 403 /index.php
+ErrorDocument 500 /index.php
+
+# ファイルキャッシュの設定
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # デフォルト
+    ExpiresDefault "access plus 1 month"
+    
+    # 画像
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    
+    # CSS, JavaScript
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    
+    # フォント
+    ExpiresByType application/x-font-ttf "access plus 1 year"
+    ExpiresByType application/x-font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+</IfModule>
+
+# GZip圧縮の設定
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml
+    AddOutputFilterByType DEFLATE text/css application/javascript
+    AddOutputFilterByType DEFLATE application/json application/xml
+    AddOutputFilterByType DEFLATE image/svg+xml application/x-font-ttf
+    AddOutputFilterByType DEFLATE application/x-font-woff application/font-woff2
+</IfModule>
