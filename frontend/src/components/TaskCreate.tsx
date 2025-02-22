@@ -1,210 +1,109 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box,
-  Paper,
-  Typography,
-  TextField,
   Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Alert,
-  SelectChangeEvent,
+  Box,
+  SelectChangeEvent
 } from '@mui/material';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { ja } from 'date-fns/locale/ja';
-import axiosInstance from '../lib/axios';
+import { format } from 'date-fns';
+import ja from 'date-fns/locale/ja';
+import axios from '../lib/axios';
 
-interface TaskForm {
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  due_date: Date | null;
+interface TaskCreateProps {
+  open: boolean;
+  onClose: () => void;
+  projectId?: number;
 }
 
-const TaskCreate = () => {
+const TaskCreate: React.FC<TaskCreateProps> = ({ open, onClose, projectId }) => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<TaskForm>({
-    title: '',
-    description: '',
-    status: 'not_started',
-    priority: 'medium',
-    due_date: new Date(),
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [status, setStatus] = useState('not_started');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSelectChange = (e: SelectChangeEvent) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleDateChange = (newValue: Date | null) => {
-    setFormData(prev => ({
-      ...prev,
-      due_date: newValue,
-    }));
-  };
-
-  const validateForm = () => {
-    if (!formData.title.trim()) {
-      setError('タイトルを入力してください');
-      return false;
-    }
-    if (!formData.description.trim()) {
-      setError('説明を入力してください');
-      return false;
-    }
-    if (!formData.due_date) {
-      setError('期限を設定してください');
-      return false;
-    }
-    return true;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setLoading(true);
-
     try {
-      await axiosInstance.post('/tasks', {
-        ...formData,
-        due_date: formData.due_date?.toISOString(),
+      await axios.post('/tasks', {
+        title,
+        description,
+        due_date: dueDate ? format(dueDate, 'yyyy-MM-dd HH:mm:ss') : null,
+        status,
+        project_id: projectId
       });
-
+      onClose();
       navigate('/tasks');
-    } catch (err) {
-      setError('タスクの作成に失敗しました');
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error('タスク作成エラー:', error);
     }
   };
 
   return (
-    <Box>
-      <Typography variant="h5" gutterBottom>
-        新規タスク作成
-      </Typography>
-
-      <Paper elevation={2} sx={{ p: 3 }}>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        <Box component="form" onSubmit={handleSubmit}>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>タスクの作成</DialogTitle>
+      <DialogContent>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
           <TextField
             fullWidth
-            required
             label="タイトル"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
+            value={title}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
             margin="normal"
+            required
           />
-
           <TextField
             fullWidth
-            required
             label="説明"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
+            value={description}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)}
             margin="normal"
             multiline
             rows={4}
           />
-
-          <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel>状態</InputLabel>
-              <Select
-                name="status"
-                value={formData.status}
-                label="状態"
-                onChange={handleSelectChange}
-              >
-                <MenuItem value="not_started">未着手</MenuItem>
-                <MenuItem value="in_progress">進行中</MenuItem>
-                <MenuItem value="completed">完了</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel>優先度</InputLabel>
-              <Select
-                name="priority"
-                value={formData.priority}
-                label="優先度"
-                onChange={handleSelectChange}
-              >
-                <MenuItem value="low">低</MenuItem>
-                <MenuItem value="medium">中</MenuItem>
-                <MenuItem value="high">高</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-
-          <Box sx={{ mt: 2 }}>
-            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ja}>
-              <DatePicker
-                label="期限"
-                value={formData.due_date}
-                onChange={handleDateChange}
-                format="yyyy/MM/dd"
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    required: true,
-                  },
-                }}
-              />
-            </LocalizationProvider>
-          </Box>
-
-          <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={loading}
-              sx={{ flex: 1 }}
+          <DateTimePicker
+            label="期限"
+            value={dueDate}
+            onChange={(newValue: Date | null) => setDueDate(newValue)}
+            format="yyyy/MM/dd HH:mm"
+            ampm={false}
+            sx={{ mt: 2, width: '100%' }}
+            slotProps={{ textField: { fullWidth: true } }}
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>ステータス</InputLabel>
+            <Select
+              value={status}
+              onChange={(e: SelectChangeEvent) => setStatus(e.target.value)}
+              label="ステータス"
             >
-              {loading ? '作成中...' : '作成'}
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={() => navigate('/tasks')}
-              sx={{ flex: 1 }}
-            >
-              キャンセル
-            </Button>
-          </Box>
+              <MenuItem value="not_started">未着手</MenuItem>
+              <MenuItem value="in_progress">進行中</MenuItem>
+              <MenuItem value="completed">完了</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
-      </Paper>
-    </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>キャンセル</Button>
+        <Button onClick={handleSubmit} variant="contained" color="primary">
+          作成
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

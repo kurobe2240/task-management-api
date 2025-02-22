@@ -5,7 +5,7 @@ import { ThemeProvider, CssBaseline } from '@mui/material'
 import { createTheme } from '@mui/material/styles'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { ja } from 'date-fns/locale/ja'
+import ja from 'date-fns/locale/ja'
 import App from './App'
 
 const theme = createTheme({
