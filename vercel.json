@@ -1,8 +1,8 @@
 {
   "projectId": "prj_ZKUVp7cxp5Vgg2UNrhp2zAf1hjr0",
   "framework": "vite",
-  "buildCommand": "cd frontend && npm run vercel-build",
-  "outputDirectory": "frontend/dist",
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/api/:path*",
