@@ -15,7 +15,6 @@ import {
   SelectChangeEvent
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format } from 'date-fns';
@@ -28,14 +27,14 @@ interface TaskCreateProps {
   projectId?: number;
 }
 
-const TaskCreate: React.FC<TaskCreateProps> = ({ open, onClose, projectId }) => {
+const TaskCreate: React.FC<TaskCreateProps> = ({ open = false, onClose = () => {}, projectId }) => {
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [status, setStatus] = useState('not_started');
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     try {
       await axios.post('/tasks', {
@@ -56,7 +55,7 @@ const TaskCreate: React.FC<TaskCreateProps> = ({ open, onClose, projectId }) => 
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>タスクの作成</DialogTitle>
       <DialogContent>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+        <Box sx={{ mt: 2 }}>
           <TextField
             fullWidth
             label="タイトル"
@@ -74,15 +73,17 @@ const TaskCreate: React.FC<TaskCreateProps> = ({ open, onClose, projectId }) => 
             multiline
             rows={4}
           />
-          <DateTimePicker
-            label="期限"
-            value={dueDate}
-            onChange={(newValue: Date | null) => setDueDate(newValue)}
-            format="yyyy/MM/dd HH:mm"
-            ampm={false}
-            sx={{ mt: 2, width: '100%' }}
-            slotProps={{ textField: { fullWidth: true } }}
-          />
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ja}>
+            <DateTimePicker
+              label="期限"
+              value={dueDate}
+              onChange={(newValue: Date | null) => setDueDate(newValue)}
+              format="yyyy/MM/dd HH:mm"
+              ampm={false}
+              sx={{ mt: 2, width: '100%' }}
+              slotProps={{ textField: { fullWidth: true } }}
+            />
+          </LocalizationProvider>
           <FormControl fullWidth margin="normal">
             <InputLabel>ステータス</InputLabel>
             <Select

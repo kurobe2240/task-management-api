@@ -111,7 +111,7 @@ function App() {
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<TaskList />} />
               <Route path="tasks" element={<TaskList />} />
-              <Route path="tasks/create" element={<TaskCreate />} />
+              <Route path="tasks/create" element={<TaskCreate open={true} onClose={() => navigate(-1)} />} />
               <Route path="projects" element={<ProjectList />} />
               <Route path="projects/create" element={<ProjectCreate />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
