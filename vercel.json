@@ -1,17 +1,14 @@
 {
-  // Vercel deployment configuration for Task Management API
   "version": 2,
   "framework": null,
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
-  // PHP runtime configuration
   "functions": {
     "api/*.php": {
       "runtime": "vercel-php@0.6.0",
       "maxDuration": 30
     }
   },
-  // Routing configuration
   "routes": [
     {
       "src": "/api/(.*)",
@@ -34,7 +31,6 @@
       "dest": "/frontend/dist/index.html"
     }
   ],
-  // CORS headers configuration
   "headers": [
     {
       "source": "/api/(.*)",
@@ -53,17 +49,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "VITE_API_URL": "/api",
-    "APP_ENV": "production",
-    "APP_DEBUG": "false",
-    "DB_HOST": "@db_host",
-    "DB_PORT": "@db_port",
-    "DB_DATABASE": "@db_database",
-    "DB_USERNAME": "@db_username",
-    "DB_PASSWORD": "@db_password",
-    "APP_SECRET": "@app_secret"
-  }
-}
+  ]
+} 
