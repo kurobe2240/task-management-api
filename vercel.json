@@ -1,12 +1,17 @@
 {
-  "projectId": "prj_ZKUVp7cxp5Vgg2UNrhp2zAf1hjr0",
+  "version": 2,
   "framework": "vite",
-  "buildCommand": "npm run vercel-build",
-  "outputDirectory": "dist",
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "functions": {
+    "api/*.php": {
+      "runtime": "vercel-php@0.6.0"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "/api/:path*"
+      "destination": "/api/index.php"
     },
     {
       "source": "/(.*)",
@@ -30,10 +35,27 @@
           "value": "Content-Type, Authorization"
         }
       ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ],
   "env": {
     "NODE_ENV": "production",
-    "VITE_API_URL": "https://task-management-api.vercel.app/api"
+    "VITE_API_URL": "/api",
+    "APP_ENV": "production",
+    "APP_DEBUG": "false",
+    "DB_HOST": "@db_host",
+    "DB_PORT": "@db_port",
+    "DB_DATABASE": "@db_database",
+    "DB_USERNAME": "@db_username",
+    "DB_PASSWORD": "@db_password",
+    "APP_SECRET": "@app_secret"
   }
 }
