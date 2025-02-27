@@ -1,27 +1,22 @@
 {
   "version": 2,
   "framework": null,
-  "buildCommand": "cd frontend && npm install && npm run build",
+  "buildCommand": "cd frontend && npm install --force && npm run build",
   "outputDirectory": "frontend/dist",
+  "installCommand": "cd frontend && npm install --force",
   "functions": {
     "api/*.php": {
-      "runtime": "vercel-php@0.6.0",
-      "maxDuration": 30
+      "runtime": "vercel-php@0.6.0"
     }
   },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/index.php",
-      "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+      "dest": "/api/index.php"
     },
     {
-      "src": "^/assets/(.*)",
-      "dest": "/frontend/dist/assets/$1",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable",
-        "x-content-type-options": "nosniff"
-      }
+      "src": "/assets/(.*)",
+      "dest": "/frontend/dist/assets/$1"
     },
     {
       "handle": "filesystem"
